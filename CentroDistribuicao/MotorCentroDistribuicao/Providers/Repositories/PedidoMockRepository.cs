@@ -1,7 +1,7 @@
 ﻿using MotorCentroDistribuicao.Domain.Models;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 
-namespace MotorCentroDistribuicao.Providers
+namespace MotorCentroDistribuicao.Providers.Repositories
 {
     public class PedidoMockRepository : IPedidoRepository
     {

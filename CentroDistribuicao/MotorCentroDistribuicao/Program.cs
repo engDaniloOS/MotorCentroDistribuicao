@@ -16,6 +16,7 @@ namespace MotorCentroDistribuicao
             DependencyInjectionServiceConfig.Configure(builder.Services);
             HttpClientServiceConfig.Configure(builder.Services, builder.Configuration);
             MapperServiceConfig.Configure(builder.Services);
+            MemoryCacheServiceConfig.Configure(builder.Services);
 
             var app = builder.Build();
 

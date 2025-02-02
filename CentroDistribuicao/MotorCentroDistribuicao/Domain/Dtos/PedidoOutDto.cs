@@ -16,7 +16,7 @@ namespace MotorCentroDistribuicao.Domain.Dtos
         [JsonIgnore]
         public bool HasError { get; set; } = false;
 
-        [JsonIgnore]
+        [JsonPropertyName("erro")]
         public string? ErrorMessage { get; set; }
     }
 }

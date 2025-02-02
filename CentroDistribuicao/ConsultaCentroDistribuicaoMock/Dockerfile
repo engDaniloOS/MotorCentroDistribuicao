@@ -18,8 +18,8 @@ COPY --from=build /app/publish .
 RUN ls -l /app
 
 ENV DELAY=40
-ENV ERROR=0
-ENV TODOS_CDS=false
+ENV ERROR=50
+ENV TODOS_CDS=true
 
 EXPOSE 8080
 

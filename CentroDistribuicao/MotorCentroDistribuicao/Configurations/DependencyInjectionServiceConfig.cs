@@ -2,7 +2,8 @@
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 using MotorCentroDistribuicao.Domain.Providers.Rest;
 using MotorCentroDistribuicao.Domain.UseCases;
-using MotorCentroDistribuicao.Providers;
+using MotorCentroDistribuicao.Providers.Repositories;
+using MotorCentroDistribuicao.Providers.Rest;
 
 namespace MotorCentroDistribuicao.Configurations
 {

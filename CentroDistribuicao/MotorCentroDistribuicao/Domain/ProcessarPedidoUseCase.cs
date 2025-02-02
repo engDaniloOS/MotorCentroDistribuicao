@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Configuration;
 using MotorCentroDistribuicao.Configurations;
 using MotorCentroDistribuicao.Domain.Dtos;
 using MotorCentroDistribuicao.Domain.Models;
@@ -26,12 +25,18 @@ namespace MotorCentroDistribuicao.Domain
 
             var itens = await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
 
+            var isProcessamentoItensOk = itens.Any(item => 
+                string.IsNullOrWhiteSpace(item.Message) || !item.Message.Equals("indisponível"));
+
             var validadePedidoMin = int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]);
+
             var respostaPedido = new PedidoOutDto
             {
                 Id = Guid.NewGuid(),
                 Itens = itens,
-                Validade = DateTime.Now.AddMinutes(validadePedidoMin)
+                Validade = DateTime.Now.AddMinutes(validadePedidoMin),
+                HasError = !isProcessamentoItensOk,
+                ErrorMessage = isProcessamentoItensOk ? string.Empty : "Erro ao processar itens"
             };
 
             await SalvarPedido(respostaPedido);
