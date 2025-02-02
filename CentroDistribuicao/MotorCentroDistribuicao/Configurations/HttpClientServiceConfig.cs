@@ -2,10 +2,14 @@
 {
     public static class HttpClientServiceConfig
     {
+        public static int MaxRequisicoesParalelas { get; private set; }
+
         public static readonly string HTTP_CLIENT_CD = "centro_distribuicao";
 
         public static void Configure(IServiceCollection services, IConfiguration configurations)
         {
+            MaxRequisicoesParalelas = int.Parse(configurations.GetRequiredSection("Http")["MaxRequisicoesParalelas"]);
+
             var centroDistribuicaoUrl = configurations.GetRequiredSection("Http")["CentroDistribuicaoUrl"];
 
             services.AddHttpClient(HTTP_CLIENT_CD, client =>

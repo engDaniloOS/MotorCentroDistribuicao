@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
+using MotorCentroDistribuicao.Configurations;
 using MotorCentroDistribuicao.Domain.Dtos;
 using MotorCentroDistribuicao.Domain.Models;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
@@ -12,6 +14,7 @@ namespace MotorCentroDistribuicao.Domain
     public class ProcessarPedidoUseCase(
         ICentroDistribuicaoProvider cdprovider,
         IPedidoRepository pedidoRepository,
+        IConfiguration configuration,
         IMapper mapper) : IProcessarPedidoUseCase
     {
         public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
@@ -23,11 +26,12 @@ namespace MotorCentroDistribuicao.Domain
 
             var itens = await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
 
+            var validadePedidoMin = int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]);
             var respostaPedido = new PedidoOutDto
             {
                 Id = Guid.NewGuid(),
                 Itens = itens,
-                Validade = DateTime.Now.AddMinutes(10)
+                Validade = DateTime.Now.AddMinutes(validadePedidoMin)
             };
 
             await SalvarPedido(respostaPedido);
@@ -56,7 +60,7 @@ namespace MotorCentroDistribuicao.Domain
         private async Task<List<ItemDto>> CallCentroDistribuicaoProviderEmParalelo(List<long> itens)
         {
             var itensProcessados = new ConcurrentBag<ItemDto>();
-            var semaforo = new SemaphoreSlim(8);
+            var semaforo = new SemaphoreSlim(HttpClientServiceConfig.MaxRequisicoesParalelas);
 
             await Parallel.ForEachAsync(itens, async (item, cancellationToken) =>
             {
