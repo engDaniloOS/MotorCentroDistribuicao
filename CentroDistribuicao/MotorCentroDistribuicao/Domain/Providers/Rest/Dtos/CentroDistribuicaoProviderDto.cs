@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MotorCentroDistribuicao.Domain.Providers.Dtos
+namespace MotorCentroDistribuicao.Domain.Providers.Rest.Dtos
 {
     public class CentroDistribuicaoProviderDto
     {

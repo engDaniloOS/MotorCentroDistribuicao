@@ -1,6 +1,6 @@
 ﻿using MotorCentroDistribuicao.Configurations;
-using MotorCentroDistribuicao.Domain.Providers;
-using MotorCentroDistribuicao.Domain.Providers.Dtos;
+using MotorCentroDistribuicao.Domain.Providers.Rest;
+using MotorCentroDistribuicao.Domain.Providers.Rest.Dtos;
 using System.Text.Json;
 
 namespace MotorCentroDistribuicao.Providers

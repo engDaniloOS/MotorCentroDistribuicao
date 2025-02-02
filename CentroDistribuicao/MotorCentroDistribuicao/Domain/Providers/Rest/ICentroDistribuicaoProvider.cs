@@ -1,6 +1,6 @@
-﻿using MotorCentroDistribuicao.Domain.Providers.Dtos;
+﻿using MotorCentroDistribuicao.Domain.Providers.Rest.Dtos;
 
-namespace MotorCentroDistribuicao.Domain.Providers
+namespace MotorCentroDistribuicao.Domain.Providers.Rest
 {
     public interface ICentroDistribuicaoProvider
     {

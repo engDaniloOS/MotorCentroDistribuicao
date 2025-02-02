@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using MotorCentroDistribuicao.Domain.Dtos;
-using MotorCentroDistribuicao.Domain.Services;
+using MotorCentroDistribuicao.Domain.UseCases;
 
 namespace MotorCentroDistribuicao.Entrypoints.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PedidosController(IPedidosService service) : ControllerBase
+    public class PedidosController(IProcessarPedidoUseCase service) : ControllerBase
     {
         [HttpPost("distribuitionsCenters")]
         public async Task<IActionResult> ProcessarCentrosDistribuicao([FromBody] PedidoDto pedido)
@@ -22,12 +22,12 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
         [HttpPost("itens")]
         public async Task<IActionResult> ProcessarItens([FromBody] PedidoDto pedido)
         {
-            var dto = await service.GetItensComCentrosDistribuicaoVinculados(pedido);
+            var retorno = await service.GetCentrosDistribuicao(pedido);
 
-            if (dto.HasError)
+            if (retorno.HasError)
                 return BadRequest();
 
-            return Ok(dto.Itens);
+            return Ok(retorno);
         }
 
     }

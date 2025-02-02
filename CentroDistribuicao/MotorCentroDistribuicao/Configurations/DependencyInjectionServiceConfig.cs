@@ -1,6 +1,7 @@
 ﻿using MotorCentroDistribuicao.Domain;
-using MotorCentroDistribuicao.Domain.Providers;
-using MotorCentroDistribuicao.Domain.Services;
+using MotorCentroDistribuicao.Domain.Providers.Repository;
+using MotorCentroDistribuicao.Domain.Providers.Rest;
+using MotorCentroDistribuicao.Domain.UseCases;
 using MotorCentroDistribuicao.Providers;
 
 namespace MotorCentroDistribuicao.Configurations
@@ -9,9 +10,11 @@ namespace MotorCentroDistribuicao.Configurations
     {
         public static void Configure(IServiceCollection services)
         {
-            services.AddScoped<IPedidosService, PedidoService>();
+            services.AddScoped<IProcessarPedidoUseCase, ProcessarPedidoUseCase>();
 
             services.AddScoped<ICentroDistribuicaoProvider, CentroDistribuicaoProvider>();
+
+            services.AddSingleton<IPedidoRepository, PedidoMockRepository>();
         }
     }
 }
