@@ -1,4 +1,6 @@
-﻿using MotorCentroDistribuicao.Domain.Dtos;
+﻿using AutoMapper;
+using MotorCentroDistribuicao.Domain.Dtos;
+using MotorCentroDistribuicao.Domain.Models;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 using MotorCentroDistribuicao.Domain.Providers.Rest;
 using MotorCentroDistribuicao.Domain.UseCases;
@@ -9,7 +11,8 @@ namespace MotorCentroDistribuicao.Domain
 {
     public class ProcessarPedidoUseCase(
         ICentroDistribuicaoProvider cdprovider,
-        IPedidoRepository pedidoRepository) : IProcessarPedidoUseCase
+        IPedidoRepository pedidoRepository,
+        IMapper mapper) : IProcessarPedidoUseCase
     {
         public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
         {
@@ -43,9 +46,16 @@ namespace MotorCentroDistribuicao.Domain
                 }
             });
 
-            var respostaPedido = new PedidoOutDto { Itens = [.. itens] };
+            var respostaPedido = new PedidoOutDto
+            {
+                Id = Guid.NewGuid(),
+                Itens = [.. itens],
+                Validade = DateTime.Now.AddMinutes(10)
+            };
 
-            await pedidoRepository.Salvar(respostaPedido.Id, respostaPedido.Itens);
+            var modeloPedido = mapper.Map<Pedido>(respostaPedido);
+
+            await pedidoRepository.Salvar(modeloPedido);
 
             Console.WriteLine($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms");
 

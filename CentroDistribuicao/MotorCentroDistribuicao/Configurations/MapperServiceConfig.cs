@@ -1,0 +1,25 @@
+﻿using AutoMapper;
+using MotorCentroDistribuicao.Domain.Dtos;
+using MotorCentroDistribuicao.Domain.Models;
+
+namespace MotorCentroDistribuicao.Configurations
+{
+    public static class MapperServiceConfig
+    {
+
+        public static void Configure(IServiceCollection services)
+        {
+            var mapperConfig = new MapperConfiguration(config =>
+            {
+                config.CreateMap<PedidoOutDto, Pedido>();
+                config.CreateMap<Pedido, PedidoOutDto>();
+                config.CreateMap<Item, ItemDto>();
+                config.CreateMap<ItemDto, Item>();
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+
+            services.AddSingleton(mapper);
+        }
+    }
+}

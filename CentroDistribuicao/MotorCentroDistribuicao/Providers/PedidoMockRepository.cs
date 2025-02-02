@@ -1,27 +1,27 @@
-﻿using MotorCentroDistribuicao.Domain.Dtos;
+﻿using MotorCentroDistribuicao.Domain.Models;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 
 namespace MotorCentroDistribuicao.Providers
 {
     public class PedidoMockRepository : IPedidoRepository
     {
-        private static Dictionary<string, List<ItemDto>> baseDeDadosMock = [];
+        private static Dictionary<string, Pedido> baseDeDadosMock = [];
 
-        public async Task<PedidoOutDto> Get(string pedidoID)
+        public async Task<Pedido> Get(string pedidoID)
         {
             await Task.Delay(20);
 
-            var findValue = baseDeDadosMock.TryGetValue(pedidoID, out var itens);
+            var findValue = baseDeDadosMock.TryGetValue(pedidoID, out var pedido);
 
             if (findValue)
-                return new PedidoOutDto { Id = Guid.Parse(pedidoID), Itens = itens };
+                return pedido!;
 
-            return new PedidoOutDto();
+            return new Pedido();
         }
 
-        public async Task Salvar(Guid id, List<ItemDto> itens)
+        public async Task Salvar(Pedido pedido)
         {
-            baseDeDadosMock.Add(id.ToString(), itens);
+            baseDeDadosMock.Add(pedido.Id.ToString()!, pedido);
 
             await Task.Delay(10);
         }
