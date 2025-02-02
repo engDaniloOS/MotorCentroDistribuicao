@@ -9,14 +9,9 @@ namespace MotorCentroDistribuicao.Domain
 {
     public class ProcessarPedidoUseCase(
         ICentroDistribuicaoProvider cdprovider,
-        IPedidoRepository pedidoWriterRepository) : IProcessarPedidoUseCase
+        IPedidoRepository pedidoRepository) : IProcessarPedidoUseCase
     {
-        public async Task<CentroDistribuicaoOutDto> GetCentrosDistribuicaoComItensVinculados(PedidoDto pedido)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ItemOutDto> GetCentrosDistribuicao(PedidoDto pedido)
+        public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -48,9 +43,9 @@ namespace MotorCentroDistribuicao.Domain
                 }
             });
 
-            var respostaPedido = new ItemOutDto { Itens = [.. itens] };
+            var respostaPedido = new PedidoOutDto { Itens = [.. itens] };
 
-            await pedidoWriterRepository.Salvar(respostaPedido.Id, respostaPedido.Itens);
+            await pedidoRepository.Salvar(respostaPedido.Id, respostaPedido.Itens);
 
             Console.WriteLine($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms");
 

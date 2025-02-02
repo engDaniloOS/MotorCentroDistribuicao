@@ -6,23 +6,25 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PedidosController(IProcessarPedidoUseCase service) : ControllerBase
+    public class PedidosController(
+        IProcessarPedidoUseCase processarUseCase,
+        IGetPedidoUseCase consultarUseCase) : ControllerBase
     {
-        [HttpPost("distribuitionsCenters")]
-        public async Task<IActionResult> ProcessarCentrosDistribuicao([FromBody] PedidoDto pedido)
+        [HttpGet("/{pedidoId}")]
+        public async Task<IActionResult> GetPedidoProcessado([FromRoute] Guid pedidoId)
         {
-            var dto = await service.GetCentrosDistribuicaoComItensVinculados(pedido);
+            var retorno = await consultarUseCase.GetPedidoProcessado(pedidoId);
 
-            if (dto.HasError)
+            if (retorno.HasError)
                 return BadRequest();
 
-            return Ok(dto.CentrosDistribuicao);
+            return Ok(retorno);
         }
 
-        [HttpPost("itens")]
+        [HttpPost]
         public async Task<IActionResult> ProcessarItens([FromBody] PedidoDto pedido)
         {
-            var retorno = await service.GetCentrosDistribuicao(pedido);
+            var retorno = await processarUseCase.GetCentrosDistribuicao(pedido);
 
             if (retorno.HasError)
                 return BadRequest();

@@ -5,5 +5,6 @@ namespace MotorCentroDistribuicao.Domain.Providers.Repository
     public interface IPedidoRepository
     {
         Task Salvar(Guid id, List<ItemDto> itens);
+        Task<PedidoOutDto> Get(string pedidoID);
     }
 }

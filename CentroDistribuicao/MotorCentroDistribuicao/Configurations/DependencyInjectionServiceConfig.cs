@@ -11,6 +11,7 @@ namespace MotorCentroDistribuicao.Configurations
         public static void Configure(IServiceCollection services)
         {
             services.AddScoped<IProcessarPedidoUseCase, ProcessarPedidoUseCase>();
+            services.AddScoped<IGetPedidoUseCase, GetPedidoUseCase>();
 
             services.AddScoped<ICentroDistribuicaoProvider, CentroDistribuicaoProvider>();
 

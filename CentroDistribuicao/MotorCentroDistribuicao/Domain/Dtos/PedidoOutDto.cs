@@ -2,10 +2,10 @@
 
 namespace MotorCentroDistribuicao.Domain.Dtos
 {
-    public record ItemOutDto
+    public record PedidoOutDto
     {
         [JsonPropertyName("pedidoId")]
-        public Guid Id { get; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [JsonPropertyName("itens")]
         public List<ItemDto> Itens { get; set; }
