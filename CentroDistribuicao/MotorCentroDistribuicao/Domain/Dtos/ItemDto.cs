@@ -2,10 +2,13 @@
 
 namespace MotorCentroDistribuicao.Domain.Dtos
 {
-    public class ItemDto
+    public record ItemDto
     {
         [JsonPropertyName("item")]
         public long Id { get; set; }
+
+        [JsonPropertyName("erro")]
+        public string Message { get; set; } = "";
 
         [JsonPropertyName("distribuitionCenters")]
         public List<string> CentrosDistribuicao { get; set; }

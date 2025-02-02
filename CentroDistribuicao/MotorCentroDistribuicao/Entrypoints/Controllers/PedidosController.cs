@@ -10,10 +10,14 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
         IProcessarPedidoUseCase processarUseCase,
         IGetPedidoUseCase consultarUseCase) : ControllerBase
     {
+
         [HttpGet("/{pedidoId}")]
         public async Task<IActionResult> GetPedidoProcessado([FromRoute] Guid pedidoId)
         {
             var retorno = await consultarUseCase.GetPedidoProcessado(pedidoId);
+
+            if (retorno.Id == Guid.Empty)
+                return NotFound();
 
             if (retorno.HasError)
                 return BadRequest();

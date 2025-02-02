@@ -11,9 +11,23 @@ namespace MotorCentroDistribuicao.Domain
     {
         public async Task<PedidoOutDto> GetPedidoProcessado(Guid pedidoId)
         {
-            var pedido = await pedidoRepository.Get(pedidoId.ToString());
+            try
+            {
+                var pedido = await pedidoRepository.Get(pedidoId.ToString());
 
-            return mapper.Map<PedidoOutDto>(pedido);
+                return mapper.Map<PedidoOutDto>(pedido);
+            }
+            catch (Exception ex)
+            {
+                var erroMessage = $"Erro ao buscar o pedido. Pedido {pedidoId}. Erro: {ex.Message}";
+                Console.WriteLine(erroMessage);
+
+                return new PedidoOutDto
+                {
+                    HasError = true,
+                    ErrorMessage = erroMessage
+                };
+            }
         }
     }
 }

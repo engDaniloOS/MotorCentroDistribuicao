@@ -23,7 +23,7 @@ namespace MotorCentroDistribuicao.Providers
         {
             baseDeDadosMock.Add(pedido.Id.ToString()!, pedido);
 
-            await Task.Delay(10);
+            await Task.Delay(20);
         }
     }
 }

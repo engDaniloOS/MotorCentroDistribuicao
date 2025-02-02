@@ -21,11 +21,44 @@ namespace MotorCentroDistribuicao.Domain
 
             var itensParaProcessamento = RemoveItensDuplicados(pedido.Itens);
 
-            var itens = new ConcurrentBag<ItemDto>();
+            var itens = await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
 
+            var respostaPedido = new PedidoOutDto
+            {
+                Id = Guid.NewGuid(),
+                Itens = itens,
+                Validade = DateTime.Now.AddMinutes(10)
+            };
+
+            await SalvarPedido(respostaPedido);
+
+            Console.WriteLine($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms");
+
+            return respostaPedido;
+        }
+
+        private List<long> RemoveItensDuplicados(List<long> itens) 
+            => itens.Distinct().ToList();
+
+        private async Task SalvarPedido(PedidoOutDto pedidoOutDto)
+        {
+            try
+            {
+                var modeloPedido = mapper.Map<Pedido>(pedidoOutDto);
+                await pedidoRepository.Salvar(modeloPedido);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao salvar o pedido {pedidoOutDto.Id} na base de dados. Erro: {ex.Message}");
+            }
+        }
+
+        private async Task<List<ItemDto>> CallCentroDistribuicaoProviderEmParalelo(List<long> itens)
+        {
+            var itensProcessados = new ConcurrentBag<ItemDto>();
             var semaforo = new SemaphoreSlim(8);
 
-            await Parallel.ForEachAsync(itensParaProcessamento, async (item, cancellationToken) =>
+            await Parallel.ForEachAsync(itens, async (item, cancellationToken) =>
             {
                 await semaforo.WaitAsync(cancellationToken);
 
@@ -33,11 +66,23 @@ namespace MotorCentroDistribuicao.Domain
                 {
                     var respostaProvider = await cdprovider.GetCentrosDistribuicaoPorItem(item);
 
-                    itens.Add(
-                        new ItemDto 
+                    itensProcessados.Add(
+                        new ItemDto
                         {
-                            Id = item, 
-                            CentrosDistribuicao = respostaProvider.CentrosDistribuicao
+                            Id = item,
+                            CentrosDistribuicao = respostaProvider.CentrosDistribuicao,
+                            Message = respostaProvider.CentrosDistribuicao.Any() ? string.Empty : "Item indisponível"
+                        });
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Erro ao processar o item {item}. Erro: {ex.Message}");
+
+                    itensProcessados.Add(
+                        new ItemDto
+                        {
+                            Id = item,
+                            Message = $"Não foi possível processar o item"
                         });
                 }
                 finally
@@ -46,22 +91,7 @@ namespace MotorCentroDistribuicao.Domain
                 }
             });
 
-            var respostaPedido = new PedidoOutDto
-            {
-                Id = Guid.NewGuid(),
-                Itens = [.. itens],
-                Validade = DateTime.Now.AddMinutes(10)
-            };
-
-            var modeloPedido = mapper.Map<Pedido>(respostaPedido);
-
-            await pedidoRepository.Salvar(modeloPedido);
-
-            Console.WriteLine($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms");
-
-            return respostaPedido;
+            return [.. itensProcessados];
         }
-
-        private List<long> RemoveItensDuplicados(List<long> itens) => itens.Distinct().ToList();
     }
 }

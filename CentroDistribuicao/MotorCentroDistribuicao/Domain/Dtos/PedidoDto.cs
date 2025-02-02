@@ -2,7 +2,7 @@
 
 namespace MotorCentroDistribuicao.Domain.Dtos
 {
-    public class PedidoDto
+    public record PedidoDto
     {
         [JsonPropertyName("itens")]
         public List<long> Itens { get; set; }
