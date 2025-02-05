@@ -1,5 +1,6 @@
 
 using MotorCentroDistribuicao.Configurations;
+using System.Text.Json.Serialization;
 
 namespace MotorCentroDistribuicao
 {
@@ -9,7 +10,10 @@ namespace MotorCentroDistribuicao
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options => 
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+            
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -17,7 +21,8 @@ namespace MotorCentroDistribuicao
             HttpClientServiceConfig.Configure(builder.Services, builder.Configuration);
             MapperServiceConfig.Configure(builder.Services);
             MemoryCacheServiceConfig.Configure(builder.Services);
-            LogServiceConfig.Configure();
+            LogServiceConfig.Configure(builder);
+            DatabaseServiceConfig.Configure(builder.Services);
 
             var app = builder.Build();
 

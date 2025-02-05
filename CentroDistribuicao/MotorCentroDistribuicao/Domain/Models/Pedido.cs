@@ -6,6 +6,6 @@
 
         public List<Item>? Itens { get; set; }
 
-        public DateTime? DataValidade { get; set; }
+        public DateTime? Validade { get; set; }
     }
 }

@@ -4,6 +4,6 @@ namespace MotorCentroDistribuicao.Domain.UseCases
 {
     public interface IGetPedidoUseCase
     {
-        Task<PedidoOutDto> GetPedidoProcessado(Guid pedidoId);
+        PedidoOutDto GetPedidoProcessado(Guid pedidoId);
     }
 }

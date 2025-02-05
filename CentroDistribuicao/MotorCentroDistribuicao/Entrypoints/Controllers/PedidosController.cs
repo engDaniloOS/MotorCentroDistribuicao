@@ -14,11 +14,11 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
         private const string CORRELATION_ID = "correlation_id";
 
         [HttpGet("/{pedidoId}")]
-        public async Task<IActionResult> GetPedidoProcessado([FromRoute] Guid pedidoId)
+        public IActionResult GetPedidoProcessado([FromRoute] Guid pedidoId)
         {
             AddCorrelationIdToLogContext(Request);
 
-            var retorno = await consultarUseCase.GetPedidoProcessado(pedidoId);
+            var retorno = consultarUseCase.GetPedidoProcessado(pedidoId);
 
             if (retorno.Id == Guid.Empty)
                 return NotFound();

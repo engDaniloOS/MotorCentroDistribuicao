@@ -6,7 +6,6 @@ using MotorCentroDistribuicao.Domain.Providers.Repository;
 using MotorCentroDistribuicao.Domain.Providers.Rest;
 using MotorCentroDistribuicao.Domain.UseCases;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace MotorCentroDistribuicao.Domain
 {
@@ -23,9 +22,6 @@ namespace MotorCentroDistribuicao.Domain
         {
             logger.LogInformation("Iniciando processamento do pedido", pedido);
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-
             var itensParaProcessamento = pedido.Itens.Distinct().ToList();
 
             var itens =
@@ -33,10 +29,10 @@ namespace MotorCentroDistribuicao.Domain
 
             var respostaPedido = buildPedidoOutDto(itens);
 
-            if (respostaPedido.Id != Guid.Empty)
-                await SalvarPedido(respostaPedido);
+            if (respostaPedido.Id != Guid.Empty) 
+                SalvarPedido(respostaPedido);
 
-            logger.LogInformation($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms", respostaPedido);
+            logger.LogInformation($"Processamento finalizado", respostaPedido);
 
             return respostaPedido;
         }
@@ -47,7 +43,7 @@ namespace MotorCentroDistribuicao.Domain
                 itens.All(item => string.IsNullOrWhiteSpace(item.Message));
 
             var itensNaoEncontrados =
-                itens.All(item => item.Message.Contains(MSG_NAO_ENCONTRADO));
+                itens.All(item => item.Message?.Contains(MSG_NAO_ENCONTRADO) == true);
 
             var validadePedidoMin =
                 int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]!);
@@ -58,17 +54,18 @@ namespace MotorCentroDistribuicao.Domain
                 Itens = itens,
                 Validade = DateTime.Now.AddMinutes(validadePedidoMin),
                 HasError = !isProcessamentoItensOk,
-                ErrorMessage = isProcessamentoItensOk ? string.Empty : "Erro ao processar itens",
+                ErrorMessage = isProcessamentoItensOk ? null : "Erro ao processar itens",
                 NotFound = itensNaoEncontrados
             };
         }
 
-        private async Task SalvarPedido(PedidoOutDto pedidoOutDto)
+        private void SalvarPedido(PedidoOutDto pedidoOutDto)
         {
             try
             {
                 var modeloPedido = mapper.Map<Pedido>(pedidoOutDto);
-                await pedidoRepository.Salvar(modeloPedido);
+
+                pedidoRepository.Salvar(modeloPedido);
             }
             catch (Exception ex)
             {
@@ -94,7 +91,7 @@ namespace MotorCentroDistribuicao.Domain
                         {
                             Id = item,
                             CentrosDistribuicao = respostaProvider.CentrosDistribuicao,
-                            Message = respostaProvider.CentrosDistribuicao.Any() ? string.Empty : "Item indisponível"
+                            Message = respostaProvider.CentrosDistribuicao.Any() ? null : "Item indisponível"
                         });
                 }
                 catch(KeyNotFoundException)

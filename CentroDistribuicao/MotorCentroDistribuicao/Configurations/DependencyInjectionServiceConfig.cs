@@ -16,7 +16,7 @@ namespace MotorCentroDistribuicao.Configurations
 
             services.AddScoped<ICentroDistribuicaoProvider, CentroDistribuicaoProvider>();
 
-            services.AddSingleton<IPedidoRepository, PedidoMockRepository>();
+            services.AddSingleton<IPedidoRepository, PedidoRepository>();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace MotorCentroDistribuicao.Configurations
 
         private const string OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3} {AppName}] [CorrelationId: {correlation_id}] {Message:lj}{NewLine}{Exception}";
 
-        public static void Configure()
+        public static void Configure(WebApplicationBuilder builder)
         {
 
             var logFormater = new JsonFormatter();
@@ -28,8 +28,10 @@ namespace MotorCentroDistribuicao.Configurations
                                 .WriteTo
                                     .Console(outputTemplate: OUTPUT_TEMPLATE)
                                 .WriteTo
-                                    .File(logFormater, "logs/log.txt", rollingInterval: RollingInterval.Hour)
+                                    .File(logFormater, "logs/log.txt", rollingInterval: RollingInterval.Day)
                                 .CreateLogger();
+
+            builder.Host.UseSerilog();
         }
     }
 }

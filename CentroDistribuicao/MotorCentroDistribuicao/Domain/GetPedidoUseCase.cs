@@ -10,11 +10,11 @@ namespace MotorCentroDistribuicao.Domain
         IMapper mapper,
         ILogger<GetPedidoUseCase> logger) : IGetPedidoUseCase
     {
-        public async Task<PedidoOutDto> GetPedidoProcessado(Guid pedidoId)
+        public PedidoOutDto GetPedidoProcessado(Guid pedidoId)
         {
             try
             {
-                var pedido = await pedidoRepository.Get(pedidoId.ToString());
+                var pedido = pedidoRepository.Get(pedidoId);
                 var resultado = mapper.Map<PedidoOutDto>(pedido);
 
                 logger.LogInformation($"Processamento de pedido {pedidoId} finalizado", resultado);
