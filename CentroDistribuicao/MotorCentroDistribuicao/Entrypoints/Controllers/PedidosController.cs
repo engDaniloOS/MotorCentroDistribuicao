@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MotorCentroDistribuicao.Domain.Dtos;
 using MotorCentroDistribuicao.Domain.UseCases;
+using Serilog.Context;
 
 namespace MotorCentroDistribuicao.Entrypoints.Controllers
 {
@@ -10,10 +11,13 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
         IProcessarPedidoUseCase processarUseCase,
         IGetPedidoUseCase consultarUseCase) : ControllerBase
     {
+        private const string CORRELATION_ID = "correlation_id";
 
         [HttpGet("/{pedidoId}")]
         public async Task<IActionResult> GetPedidoProcessado([FromRoute] Guid pedidoId)
         {
+            AddCorrelationIdToLogContext(Request);
+
             var retorno = await consultarUseCase.GetPedidoProcessado(pedidoId);
 
             if (retorno.Id == Guid.Empty)
@@ -28,12 +32,28 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessarItens([FromBody] PedidoDto pedido)
         {
+            AddCorrelationIdToLogContext(Request);
+
             var retorno = await processarUseCase.GetCentrosDistribuicao(pedido);
 
+            if (retorno.NotFound)
+                return NotFound();
+
             if (retorno.HasError)
-                return BadRequest();
+                return BadRequest(retorno);
 
             return Ok(retorno);
+        }
+
+        private void AddCorrelationIdToLogContext(HttpRequest request)
+        {
+            var correlationId = 
+                request.Headers[CORRELATION_ID].FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(correlationId))
+                correlationId = Guid.NewGuid().ToString();
+
+            LogContext.PushProperty(CORRELATION_ID, correlationId);
         }
 
     }

@@ -14,40 +14,54 @@ namespace MotorCentroDistribuicao.Domain
         ICentroDistribuicaoProvider cdprovider,
         IPedidoRepository pedidoRepository,
         IConfiguration configuration,
-        IMapper mapper) : IProcessarPedidoUseCase
+        IMapper mapper,
+        ILogger<ProcessarPedidoUseCase> logger) : IProcessarPedidoUseCase
     {
+        private const string MSG_NAO_ENCONTRADO = "não encontrado.";
+
         public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
         {
+            logger.LogInformation("Iniciando processamento do pedido", pedido);
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            var itensParaProcessamento = RemoveItensDuplicados(pedido.Itens);
+            var itensParaProcessamento = pedido.Itens.Distinct().ToList();
 
-            var itens = await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
+            var itens =
+                await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
 
-            var isProcessamentoItensOk = itens.Any(item => 
-                string.IsNullOrWhiteSpace(item.Message) || !item.Message.Equals("indisponível"));
+            var respostaPedido = buildPedidoOutDto(itens);
 
-            var validadePedidoMin = int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]);
+            if (respostaPedido.Id != Guid.Empty)
+                await SalvarPedido(respostaPedido);
 
-            var respostaPedido = new PedidoOutDto
-            {
-                Id = Guid.NewGuid(),
-                Itens = itens,
-                Validade = DateTime.Now.AddMinutes(validadePedidoMin),
-                HasError = !isProcessamentoItensOk,
-                ErrorMessage = isProcessamentoItensOk ? string.Empty : "Erro ao processar itens"
-            };
-
-            await SalvarPedido(respostaPedido);
-
-            Console.WriteLine($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms");
+            logger.LogInformation($"Processamento realizado em {stopWatch.ElapsedMilliseconds}ms", respostaPedido);
 
             return respostaPedido;
         }
 
-        private List<long> RemoveItensDuplicados(List<long> itens) 
-            => itens.Distinct().ToList();
+        private PedidoOutDto buildPedidoOutDto(List<ItemDto> itens)
+        {
+            var isProcessamentoItensOk =
+                itens.All(item => string.IsNullOrWhiteSpace(item.Message));
+
+            var itensNaoEncontrados =
+                itens.All(item => item.Message.Contains(MSG_NAO_ENCONTRADO));
+
+            var validadePedidoMin =
+                int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]!);
+
+            return new PedidoOutDto
+            {
+                Id = (isProcessamentoItensOk && !itensNaoEncontrados) ? Guid.NewGuid() : Guid.Empty,
+                Itens = itens,
+                Validade = DateTime.Now.AddMinutes(validadePedidoMin),
+                HasError = !isProcessamentoItensOk,
+                ErrorMessage = isProcessamentoItensOk ? string.Empty : "Erro ao processar itens",
+                NotFound = itensNaoEncontrados
+            };
+        }
 
         private async Task SalvarPedido(PedidoOutDto pedidoOutDto)
         {
@@ -58,7 +72,7 @@ namespace MotorCentroDistribuicao.Domain
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao salvar o pedido {pedidoOutDto.Id} na base de dados. Erro: {ex.Message}");
+                logger.LogError($"Erro ao salvar o pedido {pedidoOutDto.Id} na base de dados. Erro: {ex.Message}");
             }
         }
 
@@ -83,16 +97,18 @@ namespace MotorCentroDistribuicao.Domain
                             Message = respostaProvider.CentrosDistribuicao.Any() ? string.Empty : "Item indisponível"
                         });
                 }
+                catch(KeyNotFoundException)
+                {
+                    var error = $"Item {item} não encontrado.";
+                    logger.LogError(error);
+
+                    itensProcessados.Add(new ItemDto { Id = item, Message = error });
+                }
                 catch(Exception ex)
                 {
-                    Console.WriteLine($"Erro ao processar o item {item}. Erro: {ex.Message}");
+                    logger.LogError($"Erro ao processar o item {item}. Erro: {ex.Message}");
 
-                    itensProcessados.Add(
-                        new ItemDto
-                        {
-                            Id = item,
-                            Message = $"Não foi possível processar o item"
-                        });
+                    itensProcessados.Add(new ItemDto { Id = item, Message = $"Não foi possível processar o item" });
                 }
                 finally
                 {

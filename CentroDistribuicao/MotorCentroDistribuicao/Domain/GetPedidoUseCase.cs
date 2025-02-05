@@ -7,20 +7,24 @@ namespace MotorCentroDistribuicao.Domain
 {
     public class GetPedidoUseCase(
         IPedidoRepository pedidoRepository,
-        IMapper mapper) : IGetPedidoUseCase
+        IMapper mapper,
+        ILogger<GetPedidoUseCase> logger) : IGetPedidoUseCase
     {
         public async Task<PedidoOutDto> GetPedidoProcessado(Guid pedidoId)
         {
             try
             {
                 var pedido = await pedidoRepository.Get(pedidoId.ToString());
+                var resultado = mapper.Map<PedidoOutDto>(pedido);
 
-                return mapper.Map<PedidoOutDto>(pedido);
+                logger.LogInformation($"Processamento de pedido {pedidoId} finalizado", resultado);
+
+                return resultado;
             }
             catch (Exception ex)
             {
                 var erroMessage = $"Erro ao buscar o pedido. Pedido {pedidoId}. Erro: {ex.Message}";
-                Console.WriteLine(erroMessage);
+                logger.LogError(erroMessage);
 
                 return new PedidoOutDto
                 {

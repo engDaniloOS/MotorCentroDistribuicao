@@ -2,6 +2,7 @@
 using MotorCentroDistribuicao.Configurations;
 using MotorCentroDistribuicao.Domain.Providers.Rest;
 using MotorCentroDistribuicao.Domain.Providers.Rest.Dtos;
+using System.Net;
 using System.Text.Json;
 
 namespace MotorCentroDistribuicao.Providers.Rest
@@ -25,6 +26,9 @@ namespace MotorCentroDistribuicao.Providers.Rest
             var cachedResponse = cache.GetOrCreateAsync(url, async entry =>
             {
                 var response = await httpClient.GetAsync(url);
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                    throw new KeyNotFoundException();
 
                 response.EnsureSuccessStatusCode();
 

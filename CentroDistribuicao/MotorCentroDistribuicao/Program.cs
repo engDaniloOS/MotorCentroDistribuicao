@@ -17,6 +17,7 @@ namespace MotorCentroDistribuicao
             HttpClientServiceConfig.Configure(builder.Services, builder.Configuration);
             MapperServiceConfig.Configure(builder.Services);
             MemoryCacheServiceConfig.Configure(builder.Services);
+            LogServiceConfig.Configure();
 
             var app = builder.Build();
 
