@@ -11,7 +11,7 @@
 
         public static void Configure(IServiceCollection services, IConfiguration configurations)
         {
-            MaxRequisicoesParalelas = int.Parse(configurations.GetRequiredSection("Http")["MaxRequisicoesParalelas"]);
+            MaxRequisicoesParalelas = int.Parse(configurations.GetRequiredSection("Http")["MaxRequisicoesParalelas"]!);
 
             var centroDistribuicaoUrl = configurations.GetRequiredSection("Http")["CentroDistribuicaoUrl"];
 

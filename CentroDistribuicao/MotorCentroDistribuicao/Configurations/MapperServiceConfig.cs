@@ -17,8 +17,7 @@ namespace MotorCentroDistribuicao.Configurations
                 config.CreateMap<ItemDto, Item>();
             });
 
-            IMapper mapper = mapperConfig.CreateMapper();
-
+            var mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
         }
     }

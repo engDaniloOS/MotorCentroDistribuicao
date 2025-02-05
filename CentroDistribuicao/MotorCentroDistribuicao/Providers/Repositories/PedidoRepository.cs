@@ -6,18 +6,10 @@ namespace MotorCentroDistribuicao.Providers.Repositories
 {
     public class PedidoRepository(ILiteDatabase database) : IPedidoRepository
     {
-        public Pedido Get(Guid pedidoID)
-        {
-            var collection = database.GetCollection<Pedido>("pedidos");
+        public Pedido Get(Guid pedidoID) => GetCollection().FindById(pedidoID);
 
-            return collection.FindById(pedidoID);
-        }
+        public void Salvar(Pedido pedido) => GetCollection().Insert(pedido);
 
-        public void Salvar(Pedido pedido)
-        {
-            var collection = database.GetCollection<Pedido>("pedidos");
-
-            collection.Insert(pedido);
-        }
+        private ILiteCollection<Pedido> GetCollection() => database.GetCollection<Pedido>("pedidos");
     }
 }

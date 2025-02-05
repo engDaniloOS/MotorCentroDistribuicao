@@ -20,30 +20,27 @@ namespace MotorCentroDistribuicao.Domain
 
         public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
         {
-            logger.LogInformation("Iniciando processamento do pedido", pedido);
+            logger.LogInformation("Iniciando processamento do pedido");
 
             var itensParaProcessamento = pedido.Itens.Distinct().ToList();
-
-            var itens =
-                await CallCentroDistribuicaoProviderEmParalelo(itensParaProcessamento);
-
-            var respostaPedido = buildPedidoOutDto(itens);
+            var itensProcessados = await ProcessarItensEmParalelo(itensParaProcessamento);
+            var respostaPedido = BuildPedidoOutDto(itensProcessados);
 
             if (respostaPedido.Id != Guid.Empty) 
                 SalvarPedido(respostaPedido);
 
-            logger.LogInformation($"Processamento finalizado", respostaPedido);
+            logger.LogInformation("Processamento finalizado");
 
             return respostaPedido;
         }
 
-        private PedidoOutDto buildPedidoOutDto(List<ItemDto> itens)
+        private PedidoOutDto BuildPedidoOutDto(List<ItemDto> itens)
         {
             var isProcessamentoItensOk =
-                itens.All(item => string.IsNullOrWhiteSpace(item.Message));
+                itens.All(item => string.IsNullOrWhiteSpace(item.ErrorMessage));
 
             var itensNaoEncontrados =
-                itens.All(item => item.Message?.Contains(MSG_NAO_ENCONTRADO) == true);
+                itens.All(item => item.ErrorMessage?.Contains(MSG_NAO_ENCONTRADO) == true);
 
             var validadePedidoMin =
                 int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]!);
@@ -64,7 +61,6 @@ namespace MotorCentroDistribuicao.Domain
             try
             {
                 var modeloPedido = mapper.Map<Pedido>(pedidoOutDto);
-
                 pedidoRepository.Salvar(modeloPedido);
             }
             catch (Exception ex)
@@ -73,7 +69,7 @@ namespace MotorCentroDistribuicao.Domain
             }
         }
 
-        private async Task<List<ItemDto>> CallCentroDistribuicaoProviderEmParalelo(List<long> itens)
+        private async Task<List<ItemDto>> ProcessarItensEmParalelo(List<long> itens)
         {
             var itensProcessados = new ConcurrentBag<ItemDto>();
             var semaforo = new SemaphoreSlim(HttpClientServiceConfig.MaxRequisicoesParalelas);
@@ -91,7 +87,7 @@ namespace MotorCentroDistribuicao.Domain
                         {
                             Id = item,
                             CentrosDistribuicao = respostaProvider.CentrosDistribuicao,
-                            Message = respostaProvider.CentrosDistribuicao.Any() ? null : "Item indisponível"
+                            ErrorMessage = respostaProvider.CentrosDistribuicao.Any() ? null : "Item indisponível"
                         });
                 }
                 catch(KeyNotFoundException)
@@ -99,13 +95,12 @@ namespace MotorCentroDistribuicao.Domain
                     var error = $"Item {item} não encontrado.";
                     logger.LogError(error);
 
-                    itensProcessados.Add(new ItemDto { Id = item, Message = error });
+                    itensProcessados.Add(new ItemDto { Id = item, ErrorMessage = error });
                 }
                 catch(Exception ex)
                 {
                     logger.LogError($"Erro ao processar o item {item}. Erro: {ex.Message}");
-
-                    itensProcessados.Add(new ItemDto { Id = item, Message = $"Não foi possível processar o item" });
+                    itensProcessados.Add(new ItemDto { Id = item, ErrorMessage = $"Não foi possível processar o item" });
                 }
                 finally
                 {

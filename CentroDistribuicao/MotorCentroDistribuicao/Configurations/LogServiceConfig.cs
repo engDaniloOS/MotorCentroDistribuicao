@@ -18,7 +18,7 @@ namespace MotorCentroDistribuicao.Configurations
                                 .Enrich
                                     .FromLogContext()
                                 .Enrich
-                                    .WithProperty("AppName", "WepApi - Test")
+                                    .WithProperty("AppName", "Motor CD - Test")
                                 .MinimumLevel
                                     .Override("Microsoft", LogEventLevel.Information)
                                 .MinimumLevel
