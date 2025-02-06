@@ -17,8 +17,8 @@ WORKDIR /app
 COPY --from=build /app/publish .
 RUN ls -l /app
 
-ENV DELAY=40
-ENV ERROR=15
+ENV DELAY=10
+ENV ERROR=5
 ENV TODOS_CDS=false
 
 EXPOSE 8080

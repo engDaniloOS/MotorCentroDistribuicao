@@ -19,16 +19,16 @@ namespace MotorCentroDistribuicao.Providers.Rest
         public async Task<CentroDistribuicaoProviderDto> GetCentrosDistribuicaoPorItem(long item)
         {
             var cacheExpiresIn = configuration.GetRequiredSection("Http")["CachePeriodInMinutes"];
-            var cacheSize = configuration.GetRequiredSection("Http")["CacheSizeInMb"];
-
             var url = $"/distribuitioncenters?itemId={item}";
 
             var cachedResponse = cache.GetOrCreateAsync(url, async entry =>
             {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(int.Parse(cacheExpiresIn));
+
                 var response = await httpClient.GetAsync(url);
 
                 if (response.StatusCode == HttpStatusCode.NotFound)
-                    throw new KeyNotFoundException();
+                    return new CentroDistribuicaoProviderDto { CentrosDistribuicao = null };
 
                 response.EnsureSuccessStatusCode();
 

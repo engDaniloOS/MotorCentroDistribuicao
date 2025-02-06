@@ -82,6 +82,16 @@ namespace MotorCentroDistribuicao.Domain
                 {
                     var respostaProvider = await cdprovider.GetCentrosDistribuicaoPorItem(item);
 
+                    if (respostaProvider.CentrosDistribuicao == null)
+                    {
+                        var error = $"Item {item} não encontrado.";
+                        logger.LogError(error);
+
+                        itensProcessados.Add(new ItemDto { Id = item, ErrorMessage = error });
+
+                        return;
+                    }
+
                     itensProcessados.Add(
                         new ItemDto
                         {
@@ -89,13 +99,6 @@ namespace MotorCentroDistribuicao.Domain
                             CentrosDistribuicao = respostaProvider.CentrosDistribuicao,
                             ErrorMessage = respostaProvider.CentrosDistribuicao.Any() ? null : "Item indisponível"
                         });
-                }
-                catch(KeyNotFoundException)
-                {
-                    var error = $"Item {item} não encontrado.";
-                    logger.LogError(error);
-
-                    itensProcessados.Add(new ItemDto { Id = item, ErrorMessage = error });
                 }
                 catch(Exception ex)
                 {
