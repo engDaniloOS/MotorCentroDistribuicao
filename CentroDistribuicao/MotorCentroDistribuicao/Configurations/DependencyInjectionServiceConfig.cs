@@ -9,7 +9,7 @@ namespace MotorCentroDistribuicao.Configurations
 {
     public static class DependencyInjectionServiceConfig
     {
-        public static void Configure(IServiceCollection services)
+        public static void ConfigureDependencyInjection(this IServiceCollection services)
         {
             services.AddScoped<IProcessarPedidoUseCase, ProcessarPedidoUseCase>();
             services.AddScoped<IGetPedidoUseCase, GetPedidoUseCase>();

@@ -2,6 +2,6 @@
 {
     public static class MemoryCacheServiceConfig
     {
-        public static void Configure(IServiceCollection services) => services.AddMemoryCache();
+        public static void ConfigureMemoryCache(this IServiceCollection services) => services.AddMemoryCache();
     }
 }

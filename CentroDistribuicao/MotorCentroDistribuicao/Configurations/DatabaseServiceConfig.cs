@@ -4,7 +4,7 @@ namespace MotorCentroDistribuicao.Configurations
 {
     public static class DatabaseServiceConfig
     {
-        public static void Configure(IServiceCollection services)
+        public static void ConfigureDatabase(this IServiceCollection services)
         {
             var database = new LiteDatabase(":memory:");
 

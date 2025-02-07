@@ -9,7 +9,7 @@ namespace MotorCentroDistribuicao.Configurations
 
         private const string OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3} {AppName}] [CorrelationId: {correlation_id}] {Message:lj}{NewLine}{Exception}";
 
-        public static void Configure(WebApplicationBuilder builder)
+        public static void ConfigureLog(this WebApplicationBuilder builder)
         {
 
             var logFormater = new JsonFormatter();

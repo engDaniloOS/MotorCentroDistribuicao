@@ -7,7 +7,7 @@ namespace MotorCentroDistribuicao.Configurations
     public static class MapperServiceConfig
     {
 
-        public static void Configure(IServiceCollection services)
+        public static void ConfigureAutoMapper(this IServiceCollection services)
         {
             var mapperConfig = new MapperConfiguration(config =>
             {

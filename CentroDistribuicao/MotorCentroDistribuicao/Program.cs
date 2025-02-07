@@ -11,31 +11,25 @@ namespace MotorCentroDistribuicao
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers()
-                .AddJsonOptions(options => 
+                .AddJsonOptions(options =>
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
-            
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            DependencyInjectionServiceConfig.Configure(builder.Services);
-            HttpClientServiceConfig.Configure(builder.Services, builder.Configuration);
-            MapperServiceConfig.Configure(builder.Services);
-            MemoryCacheServiceConfig.Configure(builder.Services);
-            LogServiceConfig.Configure(builder);
-            DatabaseServiceConfig.Configure(builder.Services);
+            builder.Services.ConfigureDependencyInjection();
+            builder.Services.ConfigureHttpClient(builder.Configuration);
+            builder.Services.ConfigureAutoMapper();
+            builder.Services.ConfigureMemoryCache();
+            builder.Services.ConfigureDatabase();
 
+            builder.ConfigureLog();
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();
