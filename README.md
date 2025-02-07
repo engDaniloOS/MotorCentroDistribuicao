@@ -46,7 +46,7 @@ O projeto principal possui as seguintes características:
 ```
 - Caso todos os itens do pedido sejam validos, e processados com sucesso, a resposta da requisição terá status 200 (ok), com o ID do pedido, itens com seus CDs, e data de validade do pedido;
 - Caso todos os itens não sejam validos por não existirem, a resposta da requisição terá status 404 (not found);
-- Caso pelo menos um dos itens tenha falha no processamento, ou não esteja disponível em nenhum centro de distribuição, a requisição retornará todos os itens com falha (e os respectivos motivos), todos os itens processados com os seus CDs (caso existam), e todos os itens não encontrado (caso existam). Porém, nesse caso o pedido não terá um ID, e não será possível consulta-lo posteriormente.
+- Caso pelo menos um dos itens tenha falha no processamento, ou não esteja disponível em nenhum centro de distribuição, a requisição retornará o status 404 (bad request) com todos os itens com falha (e os respectivos motivos), todos os itens processados com os seus CDs (caso existam), e todos os itens não encontrado (caso existam). Porém, nesse caso o pedido não terá um ID, e não será possível consulta-lo posteriormente.
 ```
 
 #### Variáveis de ambiente:
