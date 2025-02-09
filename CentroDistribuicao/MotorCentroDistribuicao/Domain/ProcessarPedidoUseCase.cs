@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using MotorCentroDistribuicao.Configurations;
+using MotorCentroDistribuicao.Domain.Converters;
 using MotorCentroDistribuicao.Domain.Dtos;
 using MotorCentroDistribuicao.Domain.Models;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 using MotorCentroDistribuicao.Domain.Providers.Rest;
 using MotorCentroDistribuicao.Domain.UseCases;
+using MotorCentroDistribuicao.Domain.Validators;
 using System.Collections.Concurrent;
 
 namespace MotorCentroDistribuicao.Domain
@@ -16,50 +18,34 @@ namespace MotorCentroDistribuicao.Domain
         IMapper mapper,
         ILogger<ProcessarPedidoUseCase> logger) : IProcessarPedidoUseCase
     {
-        private const string MSG_NAO_ENCONTRADO = "não encontrado.";
 
         public async Task<PedidoOutDto> GetCentrosDistribuicao(PedidoDto pedido)
         {
             logger.LogInformation("Iniciando processamento do pedido");
 
+            var validationMessage = pedido.IsValidOrGetErrorMessage();
+
+            if (!string.IsNullOrWhiteSpace(validationMessage))
+                return PedidoOutDtoConverter.BuildOudDtoWithError(validationMessage);
+
             var itensParaProcessamento = pedido.Itens.Distinct().ToList();
             var itensProcessados = await ProcessarItensEmParalelo(itensParaProcessamento);
-            var respostaPedido = BuildPedidoOutDto(itensProcessados);
+            var respostaPedido = PedidoOutDtoConverter.BuildOutDtoFrom(itensProcessados, configuration);
 
-            if (respostaPedido.Id != Guid.Empty) 
-                SalvarPedido(respostaPedido);
+            SalvarPedido(respostaPedido);
 
             logger.LogInformation("Processamento finalizado");
 
             return respostaPedido;
         }
 
-        private PedidoOutDto BuildPedidoOutDto(List<ItemDto> itens)
-        {
-            var isProcessamentoItensOk =
-                itens.All(item => string.IsNullOrWhiteSpace(item.ErrorMessage));
-
-            var itensNaoEncontrados =
-                itens.All(item => item.ErrorMessage?.Contains(MSG_NAO_ENCONTRADO) == true);
-
-            var validadePedidoMin =
-                int.Parse(configuration.GetRequiredSection("Pedidos")["ValidadeMin"]!);
-
-            return new PedidoOutDto
-            {
-                Id = (isProcessamentoItensOk && !itensNaoEncontrados) ? Guid.NewGuid() : Guid.Empty,
-                Itens = itens,
-                Validade = DateTime.Now.AddMinutes(validadePedidoMin),
-                HasError = !isProcessamentoItensOk,
-                ErrorMessage = isProcessamentoItensOk ? null : "Erro ao processar itens",
-                NotFound = itensNaoEncontrados
-            };
-        }
-
         private void SalvarPedido(PedidoOutDto pedidoOutDto)
         {
             try
             {
+                if (pedidoOutDto.Id == Guid.Empty)
+                    return;
+
                 var modeloPedido = mapper.Map<Pedido>(pedidoOutDto);
                 pedidoRepository.Salvar(modeloPedido);
             }
