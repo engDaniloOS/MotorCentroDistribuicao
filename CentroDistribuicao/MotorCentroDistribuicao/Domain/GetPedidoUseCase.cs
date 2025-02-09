@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MotorCentroDistribuicao.Domain.Converters;
 using MotorCentroDistribuicao.Domain.Dtos;
 using MotorCentroDistribuicao.Domain.Providers.Repository;
 using MotorCentroDistribuicao.Domain.UseCases;
@@ -15,6 +16,10 @@ namespace MotorCentroDistribuicao.Domain
             try
             {
                 var pedido = pedidoRepository.Get(pedidoId);
+
+                if (pedido == null)
+                    return PedidoOutDtoConverter.BuildOudDtoNotFounded();
+
                 var resultado = mapper.Map<PedidoOutDto>(pedido);
 
                 logger.LogInformation($"Processamento de pedido {pedidoId} finalizado", resultado);

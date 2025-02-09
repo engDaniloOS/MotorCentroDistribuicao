@@ -20,7 +20,7 @@ namespace MotorCentroDistribuicao.Entrypoints.Controllers
 
             var retorno = consultarUseCase.GetPedidoProcessado(pedidoId);
 
-            if (retorno.Id == Guid.Empty)
+            if (retorno.NotFound)
                 return NotFound();
 
             if (retorno.HasError)
