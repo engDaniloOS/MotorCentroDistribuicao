@@ -2,6 +2,8 @@
 
 O motor para consulta de centro de distribuição (CD) é uma aplicação utilizada para consultar os CDs vinculados a 1 ou n itens de um pedido no carrinho de compra
 
+### Projeto de teste realizado para uma big tech
+
 ## Cenário
 
 - Old: API que fornece os CDs por itens, que permite apenas a consulta de um item por vez;
